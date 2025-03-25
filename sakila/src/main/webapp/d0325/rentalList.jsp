@@ -6,13 +6,16 @@
 	String searchWord = request.getParameter("searchWord");
 	System.out.println("storeId : " + storeId);
 	System.out.println("searchWord : " + searchWord);
-		
-	if(searchWord == null) {
-		searchWord = "";
-	}
-
 	
-	
+    if (storeId == null) {
+        storeId = "0";
+    }
+    
+    if (searchWord == null) {
+        searchWord = "";
+    }
+    
+    
 	int currentPage = 1;
 	if(request.getParameter("currentPage") != null) {
 		currentPage = Integer.parseInt(request.getParameter("currentPage"));
@@ -31,7 +34,8 @@
 	PreparedStatement stmt1 = null;
 	PreparedStatement stmt2 = null; 
 	
-    if(storeId == null && searchWord == null){
+	
+    if(storeId.equals("0") && searchWord.isEmpty()){
 		String sql1 = "SELECT"
 	    			+ " f.title title, i.inventory_id inventoryId, r.rental_id rentalId"
 	    			+ " , r.rental_date rentalDate, r.return_date returnDate, c.first_name firstName"
@@ -41,7 +45,6 @@
 					+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
 					+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
 					+ " INNER JOIN store s ON i.store_id = s.store_id"
-					+ " where s.store_id like ? and f.title like ? "
 					+ " order by r.rental_date asc"
 					+ " limit ?, ?";
 		
@@ -49,28 +52,24 @@
 	   				+ " INNER JOIN inventory i ON f.film_id = i.film_id"
 	   				+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
 	   				+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
-	   				+ " INNER JOIN store s ON i.store_id = s.store_id"
-	    			+ " where s.store_id like ? and f.title like ?";
+	   				+ " INNER JOIN store s ON i.store_id = s.store_id";
 		
 	    stmt1 = conn.prepareStatement(sql1);
 	    stmt2 = conn.prepareStatement(sql2);
-		stmt1.setObject(1, storeId);
-		stmt1.setObject(2, "%"+searchWord+"%");
-		stmt1.setObject(3, startRow);
-		stmt1.setObject(4, rowPerPage);
-		
-		stmt2.setObject(1, storeId);
-		stmt2.setObject(2, "%"+searchWord+"%");		
-    } else if(storeId != null && searchWord == null){
+		stmt1.setObject(1, startRow);
+		stmt1.setObject(2, rowPerPage);
+	
+    } else if(storeId.equals("0") || storeId.equals("1") || storeId.equals("2")){
     	String sql1 = "SELECT"
 	    			+ " f.title title, i.inventory_id inventoryId, r.rental_id rentalId"
 	    			+ " , r.rental_date rentalDate, r.return_date returnDate, c.first_name firstName"
-	    			+ " , c.last_name lastName, c.customer_id customerId, s.store_id storeId"				+ " FROM film f "
-					+ " INNER JOIN inventory i ON f.film_id = i.film_id"
+	    			+ " , c.last_name lastName, c.customer_id customerId, s.store_id storeId"
+	    	    	+ " FROM film f "
+	    			+ " INNER JOIN inventory i ON f.film_id = i.film_id"
 					+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
 					+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
 					+ " INNER JOIN store s ON i.store_id = s.store_id"
-					+ " where s.store_id like ?"
+					+ " where s.store_id = ?"
 					+ " order by r.rental_date asc"
 					+ " limit ?, ?";
     	
@@ -79,7 +78,7 @@
 	   				+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
 	   				+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
 	   				+ " INNER JOIN store s ON i.store_id = s.store_id"
-	    			+ " where s.store_id like";
+	    			+ " where s.store_id = ?";
 		
 	    stmt1 = conn.prepareStatement(sql1);
 	    stmt2 = conn.prepareStatement(sql2);
@@ -90,65 +89,36 @@
 	    
 		stmt2.setObject(1, storeId);
    
-    } else if(storeId == null && searchWord != null) {
+    } else if(searchWord != "") {
     	String sql1 = "SELECT"
-	    			+ " f.title title, i.inventory_id inventoryId, r.rental_id rentalId"
-	    			+ " , r.rental_date rentalDate, r.return_date returnDate, c.first_name firstName"
-	    			+ " , c.last_name lastName, c.customer_id customerId, s.store_id storeId"
-					+ " FROM film f "
-					+ " INNER JOIN inventory i ON f.film_id = i.film_id"
-					+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
-					+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
-					+ " INNER JOIN store s ON i.store_id = s.store_id"
-					+ " where f.title like ? "
-					+ " order by r.rental_date asc"
-					+ " limit ?, ?";
+	    			+ "f.title title, i.inventory_id inventoryId, r.rental_id rentalId"
+	    			+ ", r.rental_date rentalDate, r.return_date returnDate, c.first_name firstName"
+	    			+ ", c.last_name lastName, c.customer_id customerId, s.store_id storeId"
+					+ "FROM film f"
+					+ "INNER JOIN inventory i ON f.film_id = i.film_id"
+					+ "INNER JOIN rental r ON i.inventory_id = r.inventory_id"
+					+ "INNER JOIN customer c ON r.customer_id = c.customer_id"
+					+ "INNER JOIN store s ON i.store_id = s.store_id"
+					+ "where f.title like ?"
+					+ "order by r.rental_date asc"
+					+ "limit ?, ?";
     	
     	String sql2 = "SELECT count(*) as cnt from film f"
-	   				+ " INNER JOIN inventory i ON f.film_id = i.film_id"
-	   				+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
-	   				+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
-	   				+ " INNER JOIN store s ON i.store_id = s.store_id"
-	    			+ " where f.title like ?";
+	   				+ "INNER JOIN inventory i ON f.film_id = i.film_id"
+	   				+ "INNER JOIN rental r ON i.inventory_id = r.inventory_id"
+	   				+ "INNER JOIN customer c ON r.customer_id = c.customer_id"
+	   				+ "INNER JOIN store s ON i.store_id = s.store_id"
+	    			+ "where f.title like ?";
     	
    	    stmt1 = conn.prepareStatement(sql1);
    	    stmt2 = conn.prepareStatement(sql2);
-   		stmt1.setObject(1, "%"+searchWord+"%");
+   	    
+   	    stmt1.setObject(1, "%"+searchWord+"%");
+   	    System.out.println("searchWord : " + searchWord);
    		stmt1.setObject(2, startRow);
    		stmt1.setObject(3, rowPerPage);
    		
-		stmt2.setObject(1, "%"+searchWord+"%");
-		
-    } else if(storeId != null && searchWord != null){
-		String sql1 = "SELECT"
-    			+ " f.title title, i.inventory_id inventoryId, r.rental_id rentalId"
-    			+ " , r.rental_date rentalDate, r.return_date returnDate, c.first_name firstName"
-    			+ " , c.last_name lastName, c.customer_id customerId, s.store_id storeId"					
-    			+ " FROM film f "
-				+ " INNER JOIN inventory i ON f.film_id = i.film_id"
-				+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
-				+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
-				+ " INNER JOIN store s ON i.store_id = s.store_id"
-				+ " where s.store_id like ? and f.title like ? "
-				+ " order by r.rental_date asc"
-				+ " limit ?, ?";
-	
-	String sql2 = "SELECT count(*) as cnt from film f"
-   				+ " INNER JOIN inventory i ON f.film_id = i.film_id"
-   				+ " INNER JOIN rental r ON i.inventory_id = r.inventory_id"
-   				+ " INNER JOIN customer c ON r.customer_id = c.customer_id"
-   				+ " INNER JOIN store s ON i.store_id = s.store_id"
-    			+ " where s.store_id like ? and f.title like ?";
-	
-	stmt1 = conn.prepareStatement(sql1);
-	stmt2 = conn.prepareStatement(sql2);
-	stmt1.setObject(1, storeId);
-	stmt1.setObject(2, "%" + searchWord + "%");
-	stmt1.setObject(3, startRow);
-	stmt1.setObject(4, rowPerPage);
-	
-	stmt2.setObject(1, storeId);
-	stmt2.setObject(2, "%" + searchWord + "%");
+   	    stmt2.setObject(1, "%"+searchWord+"%");
     }
     
 	ResultSet rs1 = stmt1.executeQuery();
@@ -188,9 +158,9 @@
 	<form action="/sakila/d0325/rentalList.jsp">
 		Store :
 		<select name="storeId">
-			<option value="all">전체</option>
-			<option value="one">1지점</option>
-			<option value="two">2지점</option>
+			<option value="0">전체</option>
+			<option value="1">1지점</option>
+			<option value="2">2지점</option>
 		</select>
 		<button type="submit">검색</button>	
 	</form>
@@ -240,7 +210,7 @@
 	<%
 		if(currentPage < lastPage) {
 	%>
-		<a href="/sakila/d0325/rentalList.jsp?currentPage=<%=lastPage%>1&searchWord=<%=searchWord%>&storeId=<%=storeId%>">마지막</a>	
+		<a href="/sakila/d0325/rentalList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>&storeId=<%=storeId%>">마지막</a>	
 	<%
 		}
 	%>			
