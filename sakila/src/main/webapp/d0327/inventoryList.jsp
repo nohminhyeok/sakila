@@ -2,7 +2,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="java.sql.*" %>
 <%
-	String searchWord = request.getParameter("searachWord");
+	String searchWord = request.getParameter("searchWord");
 	System.out.println("searchWord : " + searchWord);
 	
 	if (searchWord == null) {
@@ -27,29 +27,36 @@
 	PreparedStatement stmt1 = null;
 	PreparedStatement stmt2 = null;
 	
-	String sql1 = "SELECT t1.inventory_id, t1.title, t2.isRental "
+    String sql1 = "SELECT t1.inventory_id, t1.title, t2.isRental "
 				+ "FROM (SELECT i.inventory_id, f.title "
 				+ "FROM inventory i "
 				+ "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 				+ "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-				+ "CASE WHEN return_date IS NULL THEN '대여불가' "
-				+ "ELSE '대여가능' END AS isRental "
+				+ "CASE WHEN return_date IS NULL THEN '불가' "
+				+ "ELSE '가능' END AS isRental "
 				+ "FROM rental WHERE (inventory_id, rental_date) IN ("
 				+ "SELECT inventory_id, MAX(rental_date) "
 				+ "FROM rental GROUP BY inventory_id)) t2 "
 				+ "ON t1.inventory_id = t2.inventory_id";
-	String sql2 = "SELECT count(distinct t1.fitle) as cnt FROM inventory i "
-				+ "INNER JOIN film f ON i.film_id = f.film_id "
-				+ "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-				+ "CASE WHEN return_date IS NULL THEN '대여불가' "
-				+ "ELSE '대여가능' END AS isRental FROM rental "
-				+ "WHERE (inventory_id, rental_date) IN (SELECT inventory_id, MAX(rental_date) FROM rental "
-				+ "GROUP BY inventory_id)) t2 ON i.inventory_id = t2.inventory_id";
-	
-	if(!searchWord.isEmpty()){
-		sql1 += "where t1.title like ?";
-		sql2 += "and t1 title like ? order by t1.inventory_id asc limit ?, ?";
+
+	String sql2 = "SELECT count(distinct t1.title) as cnt "
+	            + "FROM (SELECT i.inventory_id, f.title "
+	            + "FROM inventory i "
+	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
+	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
+	            + "CASE WHEN return_date IS NULL THEN '불가' "
+	            + "ELSE '가능' END AS isRental "
+	            + "FROM rental WHERE (inventory_id, rental_date) IN ("
+	            + "SELECT inventory_id, MAX(rental_date) "
+	            + "FROM rental GROUP BY inventory_id)) t2 "
+	            + "ON t1.inventory_id = t2.inventory_id";
+
+	if (!searchWord.isEmpty()) {
+		sql1 += " WHERE t1.title LIKE ?";
+		sql2 += " AND t1.title LIKE ?";
 	}
+
+	sql1 += " ORDER BY t1.inventory_id ASC LIMIT ?, ?";
 	
 	stmt1 = conn.prepareStatement(sql1);
 	stmt2 = conn.prepareStatement(sql2);
@@ -58,11 +65,13 @@
 	
 	if(!searchWord.isEmpty()){
 		stmt1.setObject(paramIndex, "%"+searchWord+"%");
-		stmt2.setObject(paramIndex, startRow);
-		stmt2.setObject(paramIndex+1, rowPerPage);
+		stmt2.setObject(paramIndex, "%"+searchWord+"%");
 		paramIndex++;
 	}
 	
+	stmt1.setObject(paramIndex, startRow);
+	stmt1.setObject(paramIndex+1, rowPerPage);
+
 	ResultSet rs1 = stmt1.executeQuery();
 	ResultSet rs2 = stmt2.executeQuery();
 	
@@ -95,7 +104,8 @@
 		<tr>
 			<th>Inventory_id</th>
 			<th>제목</th>
-			<th>대여 가능 유무</th>
+			<th>대여 유무</th>
+			<th>대여하기</th>
 		</tr>
 		<%
 			for(HashMap<String, Object> m : list) {
@@ -104,29 +114,42 @@
 				<td><%=m.get("t1.inventory_id")%></td>
 				<td><%=m.get("t1.title")%></td>
 				<td><%=m.get("t2.isRental")%></td>
+				<td>
+					<% 
+						if(m.get("t2.isRental") == null || m.get("t2.isRental").equals("불가")){
+					%>
+						
+					<%
+						} else {
+							
+					%>	
+					<button type="submit">대여하기</button></td>
+					<%
+						}
+					%>							
 			</tr>
 		<%
 			}
 		%>				
 	</table>
 	<form action="/sakila/d0327/inventoryList.jsp">
-		<input type="text" name="searchWord">
+		<input type="text" name="searchWord" value="<%=searchWord%>">
 		<button type="submit">영화검색</button>
 	</form>
 	<%
 		if(currentPage > 1 ) {
 	%>
-		<a href="/sakila/d0327/inventoryList.jsp?currentPage=1">처음</a>
+		<a href="/sakila/d0327/inventoryList.jsp?currentPage=1&searchWord=<%=searchWord%>">처음</a>
 	<%
 		}
 	%>
-		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=currentPage-1%>">이전</a>   
+		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=currentPage-1%>&searchWord=<%=searchWord%>">이전</a>   
 		<%=currentPage%>
-		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=currentPage+1%>">다음</a>   
+		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=currentPage+1%>&searchWord=<%=searchWord%>">다음</a>   
 	<%
 		if(currentPage < lastPage) {
 	%>
-		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=lastPage%>">마지막</a>   
+		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>">마지막</a>   
 	<%
 		}
 	%> 
