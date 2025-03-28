@@ -27,8 +27,8 @@
 	PreparedStatement stmt1 = null;
 	PreparedStatement stmt2 = null;
 	
-    String sql1 = "SELECT t1.inventory_id, t1.title, t2.isRental "
-				+ "FROM (SELECT i.inventory_id, f.title "
+    String sql1 = "SELECT t1.inventory_id, t1.title, t1.store_id, t2.isRental "
+				+ "FROM (SELECT i.inventory_id, f.title, i.store_id "
 				+ "FROM inventory i "
 				+ "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 				+ "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
@@ -40,7 +40,7 @@
 				+ "ON t1.inventory_id = t2.inventory_id";
 
 	String sql2 = "SELECT count(distinct t1.title) as cnt "
-	            + "FROM (SELECT i.inventory_id, f.title "
+	            + "FROM (SELECT i.inventory_id, f.title, i.store_id "
 	            + "FROM inventory i "
 	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
@@ -89,6 +89,7 @@
 		m.put("t1.inventory_id", rs1.getObject("t1.inventory_id"));
 		m.put("t1.title", rs1.getObject("t1.title"));
 		m.put("t2.isRental", rs1.getObject("t2.isRental"));
+		m.put("t1.store_id", rs1.getObject("t1.store_id"));
 		list.add(m);
 	}
 %>
@@ -104,7 +105,8 @@
 		<tr>
 			<th>Inventory_id</th>
 			<th>제목</th>
-			<th>대여 유무</th>
+			<th>지점</th>
+			<th>대여유무</th>
 			<th>대여하기</th>
 		</tr>
 		<%
@@ -113,6 +115,7 @@
 			<tr>
 				<td><%=m.get("t1.inventory_id")%></td>
 				<td><%=m.get("t1.title")%></td>
+				<td><%=m.get("t1.store_id") %></td>
 				<td><%=m.get("t2.isRental")%></td>
 				<td>
 					<% 
