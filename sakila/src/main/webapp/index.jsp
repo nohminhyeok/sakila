@@ -1,4 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+	// 로그인 된 상태인지 아닌지 확인
+	Integer staffId = (Integer)(session.getAttribute("loginStaff"));
+
+	if(staffId == null) { // 로그인 상태가 아니면
+		response.sendRedirect("/sakila/loginForm.jsp");
+		return;
+	}
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,12 +15,18 @@
 <title></title>
 </head>
 <body>
+	<div>
+		<%=staffId%>님 방가방가~
+		<a href="/sakila/logout.jsp"><button type="submit">로그아웃</button></a>
+		<a href="/sakila/updatePasswordForm.jsp"><button type="submit">비밀번호 변경</button></a>	
+		<hr>
+	</div>
 	<h1>Index</h1>
 		<ol>
 			<li><a href="/sakila/d0325/rentalList.jsp">대여목록</a></li>
 			<li><a href="/sakila/d0326/filmList.jsp">필름목록</a></li>
 			<li><a href="/sakila/d0326/actorList.jsp">액터목록</a></li>
-			<li><a href="/sakila/d0327/inventoryList.jsp">대여</a></li>		
+			<li><a href="/sakila/d0327/inventoryList.jsp">영화대여</a></li>		
 		</ol>
 </body>
 </html>

@@ -2,6 +2,13 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
 <%
+	Integer staffId = (Integer)(session.getAttribute("loginStaff"));
+	
+	if(staffId == null) { // 로그인 상태가 아니면
+		response.sendRedirect("/sakila/loginForm.jsp");
+		return;
+	}
+
    String storeId = request.getParameter("storeId");
    String searchWord = request.getParameter("searchWord");
    System.out.println("storeId : " + storeId);
