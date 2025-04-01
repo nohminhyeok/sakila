@@ -83,47 +83,132 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title></title>
+<title>배우 목록</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    h1 {
+        text-align: center;
+        color: #4CAF50;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #45a049;
+    }
+
+    form {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    input[type="text"] {
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .pagination {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        text-decoration: none;
+        color: #4CAF50;
+        margin: 0 10px;
+        font-size: 16px;
+    }
+
+    .pagination a:hover {
+        color: #45a049;
+    }
+</style>
 </head>
 <body>
-	<h1>배우 상세정보</h1>
-		<table border="1">
-			<tr>
-				<th>배우 번호</th>
-				<th>배우 이름</th>
-			</tr>
-		<%
-			for(HashMap<String, Object> m : list) {
-		%>
-			<tr>
-				<td><%=m.get("a.actor_id") %></td>
-				<td><%=m.get("actor_name") %></td>
-			</tr>
-		<%
-			}		
-		%>
-		</table>
-		<form action="/sakila/d0326/filmList.jsp">
-			배우 검색 : <br>
-			<input type="text" name="searchWord" value="<%=searchWord%>">
-			<button type="submit">검색</button>
-		</form>
-			<%
+	<h1>배우 목록</h1>
+	<table>
+		<tr>
+			<th>배우 번호</th>
+			<th>배우 이름</th>
+		</tr>
+	<%
+		for(HashMap<String, Object> m : list) {
+	%>
+		<tr>
+			<td><%=m.get("a.actor_id") %></td>
+			<td><%=m.get("actor_name") %></td>
+		</tr>
+	<%
+		}		
+	%>
+	</table>
+	<form action="/sakila/d0326/actorList.jsp">
+		배우 검색 : <br>
+		<input type="text" name="searchWord" value="<%=searchWord%>">
+		<button type="submit">검색</button>
+	</form>
+
+	<div class="pagination">
+	<%
 		if(currentPage > 1 ) {
 	%>
-		<a href="/sakila/d0326/actorList.jsp?currentPage=1">처음</a>
+		<a href="/sakila/d0326/actorList.jsp?currentPage=1&searchWord=<%=searchWord%>">처음</a>
 	<%
 		}
 	%>
-		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=currentPage-1%>">이전</a>   
+		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=currentPage-1%>&searchWord=<%=searchWord%>">이전</a>   
 		<%=currentPage%>
-		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=currentPage+1%>">다음</a>   
+		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=currentPage+1%>&searchWord=<%=searchWord%>">다음</a>   
 	<%
 		if(currentPage < lastPage) {
 	%>
-		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=lastPage%>">마지막</a>   
+		<a href="/sakila/d0326/actorList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>">마지막</a>   
 	<%
 		}
-	%> 
+	%>  
+	</div>
 </body>
 </html>

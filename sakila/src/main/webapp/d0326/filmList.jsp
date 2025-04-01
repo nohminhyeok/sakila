@@ -93,11 +93,93 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title></title>
+<title>Film List</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f8f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    h1 {
+        text-align: center;
+        color: #4CAF50;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #45a049;
+    }
+
+    form {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    input[type="text"] {
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .pagination {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        text-decoration: none;
+        color: #4CAF50;
+        margin: 0 10px;
+        font-size: 16px;
+    }
+
+    .pagination a:hover {
+        color: #45a049;
+    }
+</style>
 </head>
 <body>
 	<h1>Film List</h1>
-	<table border="1">
+	<table>
 		<tr>
 			<th>영화 목록</th>		
 		</tr>
@@ -115,11 +197,13 @@
 		}
 	%>			
 	</table>   
-		<form action="/sakila/d0326/filmList.jsp">
-			영화 검색 : <br>
-			<input type="text" name="searchWord" value="<%=searchWord%>">
-			<button type="submit">검색</button>
-		</form>
+	<form action="/sakila/d0326/filmList.jsp">
+		영화 검색 : <br>
+		<input type="text" name="searchWord" value="<%=searchWord%>">
+		<button type="submit">검색</button>
+	</form>
+
+	<div class="pagination">
 	<%
 		if(currentPage > 1 ) {
 	%>
@@ -137,5 +221,6 @@
 	<%
 		}
 	%>  
+	</div>
 </body>
 </html>

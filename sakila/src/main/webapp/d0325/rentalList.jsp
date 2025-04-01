@@ -123,6 +123,75 @@
 <head>
 <meta charset="UTF-8">
 <title>Rental List</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f8f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    h1 {
+        text-align: center;
+        color: #4CAF50;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    form {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    select, input[type="text"] {
+        padding: 5px;
+        margin: 5px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    a {
+        text-decoration: none;
+        color: #4CAF50;
+        font-size: 16px;
+        margin: 0 10px;
+    }
+
+    a:hover {
+        color: #45a049;
+    }
+</style>
 </head>
 <body>
    <h1>Rental List</h1>
@@ -136,7 +205,7 @@
       <button type="submit">검색</button>   
    </form>
    
-   <table border="1">
+   <table>
       <tr>
          <th>rental Id</th>
          <th>film Title</th>
@@ -160,27 +229,31 @@
          }
       %>            
    </table>
+
    <form action="/sakila/d0325/rentalList.jsp">
       filmTitle SearchWord : 
       <input type="text" name="searchWord" value="<%=searchWord%>">
       <button type="submit">검색</button>
    </form>
-   <%
-      if(currentPage > 1) {
-   %>
-      <a href="/sakila/d0325/rentalList.jsp?currentPage=1&searchWord=<%=searchWord%>&storeId=<%=storeId%>">처음</a>   
-   <%
-      }
-   %>         
+
+   <div style="text-align: center;">
+      <%
+         if(currentPage > 1) {
+      %>
+         <a href="/sakila/d0325/rentalList.jsp?currentPage=1&searchWord=<%=searchWord%>&storeId=<%=storeId%>">처음</a>   
+      <%
+         }
+      %>         
       <a href="/sakila/d0325/rentalList.jsp?currentPage=<%=currentPage-1%>&searchWord=<%=searchWord%>&storeId=<%=storeId%>">이전</a>   
       <%=currentPage%>
       <a href="/sakila/d0325/rentalList.jsp?currentPage=<%=currentPage+1%>&searchWord=<%=searchWord%>&storeId=<%=storeId%>">다음</a>   
-   <%
-      if(currentPage < lastPage) {
-   %>
-      <a href="/sakila/d0325/rentalList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>&storeId=<%=storeId%>">마지막</a>   
-   <%
-      }
-   %>         
+      <%
+         if(currentPage < lastPage) {
+      %>
+         <a href="/sakila/d0325/rentalList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>&storeId=<%=storeId%>">마지막</a>   
+      <%
+         }
+      %>         
+   </div>
 </body>
 </html>

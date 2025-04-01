@@ -2,13 +2,19 @@
 <%@ page import="java.util.*" %>
 <%@ page import="java.sql.*" %>
 <%
+	Integer staffId = (Integer)(session.getAttribute("loginStaff"));
+	
+	if(staffId == null) { // 로그인 상태면
+	    response.sendRedirect("/sakila/index.jsp");
+	    return;
+	}
+
 	String searchWord = request.getParameter("searchWord");
 	System.out.println("searchWord : " + searchWord);
 	
 	if (searchWord == null) {
 			searchWord = "";
 	}
-
 
 	int currentPage = 1;
 	if(request.getParameter("currentPage") != null) {
@@ -27,24 +33,24 @@
 	PreparedStatement stmt1 = null;
 	PreparedStatement stmt2 = null;
 	
-    String sql1 = "SELECT t1.inventory_id, t1.title, t1.store_id, t2.isRental "
-				+ "FROM (SELECT i.inventory_id, f.title, i.store_id "
-				+ "FROM inventory i "
-				+ "INNER JOIN film f ON i.film_id = f.film_id) t1 "
-				+ "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-				+ "CASE WHEN return_date IS NULL THEN '불가' "
-				+ "ELSE '가능' END AS isRental "
-				+ "FROM rental WHERE (inventory_id, rental_date) IN ("
-				+ "SELECT inventory_id, MAX(rental_date) "
-				+ "FROM rental GROUP BY inventory_id)) t2 "
-				+ "ON t1.inventory_id = t2.inventory_id";
+	String sql1 = "SELECT t1.inventory_id, t1.title, t1.store_id, t2.isRental "
+	            + "FROM (SELECT i.inventory_id, f.title, i.store_id "
+	            + "FROM inventory i "
+	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
+	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
+	            + "CASE WHEN return_date IS NULL AND rental_date <= NOW() THEN '불가' "
+	            + "ELSE '가능' END AS isRental "
+	            + "FROM rental WHERE (inventory_id, rental_date) IN ("
+	            + "SELECT inventory_id, MAX(rental_date) "
+	            + "FROM rental GROUP BY inventory_id)) t2 "
+	            + "ON t1.inventory_id = t2.inventory_id";
 
 	String sql2 = "SELECT count(distinct t1.title) as cnt "
 	            + "FROM (SELECT i.inventory_id, f.title, i.store_id "
 	            + "FROM inventory i "
 	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-	            + "CASE WHEN return_date IS NULL THEN '불가' "
+	    	            + "CASE WHEN return_date IS NULL AND rental_date <= NOW() THEN '불가' "
 	            + "ELSE '가능' END AS isRental "
 	            + "FROM rental WHERE (inventory_id, rental_date) IN ("
 	            + "SELECT inventory_id, MAX(rental_date) "
@@ -94,51 +100,128 @@
 	}
 %>
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title></title>
+<title>재고 목록</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #4CAF50;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    form {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    input[type="text"] {
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    .pagination {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        text-decoration: none;
+        color: #4CAF50;
+        margin: 0 10px;
+        font-size: 16px;
+    }
+
+    .pagination a:hover {
+        color: #45a049;
+    }
+</style>
 </head>
 <body>
-	<h1>Inventory List</h1>
-	<table border="1">
+	<h1>영화 재고 목록</h1>
+	<table>
 		<tr>
-			<th>Inventory_id</th>
-			<th>제목</th>
+			<th>재고 번호</th>
+			<th>영화 제목</th>
 			<th>지점</th>
-			<th>대여유무</th>
+			<th>대여 유무</th>
 			<th>대여하기</th>
 		</tr>
-		<%
-			for(HashMap<String, Object> m : list) {
-		%>
-			<tr>
-				<td><%=m.get("t1.inventory_id")%></td>
-				<td><%=m.get("t1.title")%></td>
-				<td><%=m.get("t1.store_id") %></td>
-				<td><%=m.get("t2.isRental")%></td>
-				<td>
-					<% 
-						if(m.get("t2.isRental") == null || m.get("t2.isRental").equals("불가")){
-					%>
-						
-					<%
-						} else {
-							
-					%>	
-					<button type="submit">대여하기</button></td>
-					<%
-						}
-					%>							
-			</tr>
-		<%
-			}
-		%>				
+	<%
+		for(HashMap<String, Object> m : list) {
+	%>
+		<tr>
+			<td><%=m.get("t1.inventory_id") %></td>
+			<td><%=m.get("t1.title") %></td>
+			<td><%=m.get("t1.store_id") %></td>
+			<td><%=m.get("t2.isRental") %></td>
+			<td>
+				<% 
+					if(m.get("t2.isRental") == null || m.get("t2.isRental").equals("불가")){
+				%>
+					<button type="button" style="background-color:olive">반납하기</button>
+				<%
+					} else {
+				%>
+					<a href="/sakila/d0327/insertRentalForm.jsp?inventoryId=<%=m.get("t1.inventory_id") %>"><button type="button">대여하기</button></a>
+				<%
+					}
+				%>							
+			</td>
+		</tr>
+	<%
+		}
+	%>
 	</table>
+
 	<form action="/sakila/d0327/inventoryList.jsp">
+		영화 검색 : <br>
 		<input type="text" name="searchWord" value="<%=searchWord%>">
-		<button type="submit">영화검색</button>
+		<button type="submit">검색</button>
 	</form>
+
+	<div class="pagination">
 	<%
 		if(currentPage > 1 ) {
 	%>
@@ -155,6 +238,7 @@
 		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>">마지막</a>   
 	<%
 		}
-	%> 
+	%>  
+	</div>
 </body>
 </html>
