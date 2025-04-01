@@ -4,7 +4,7 @@
 <%
 	Integer staffId = (Integer)(session.getAttribute("loginStaff"));
 	
-	if(staffId == null) { // 로그인 상태면
+	if(staffId == null) { // 로그인 상태 아니면
 	    response.sendRedirect("/sakila/index.jsp");
 	    return;
 	}
@@ -38,20 +38,20 @@
 	            + "FROM inventory i "
 	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-	            + "CASE WHEN return_date IS NULL AND rental_date <= NOW() THEN '불가' "
+	            + "CASE WHEN return_date IS null THEN '불가' "
 	            + "ELSE '가능' END AS isRental "
 	            + "FROM rental WHERE (inventory_id, rental_date) IN ("
 	            + "SELECT inventory_id, MAX(rental_date) "
 	            + "FROM rental GROUP BY inventory_id)) t2 "
 	            + "ON t1.inventory_id = t2.inventory_id";
 
-	String sql2 = "SELECT count(distinct t1.title) as cnt "
+	String sql2 = "SELECT count(*) as cnt "
 	            + "FROM (SELECT i.inventory_id, f.title, i.store_id "
 	            + "FROM inventory i "
 	            + "INNER JOIN film f ON i.film_id = f.film_id) t1 "
 	            + "LEFT OUTER JOIN (SELECT inventory_id, rental_date, "
-	    	            + "CASE WHEN return_date IS NULL AND rental_date <= NOW() THEN '불가' "
-	            + "ELSE '가능' END AS isRental "
+	    	    + "CASE WHEN return_date IS NULL THEN '불가' "
+	            + "ELSE '가능' END AS isRental "	
 	            + "FROM rental WHERE (inventory_id, rental_date) IN ("
 	            + "SELECT inventory_id, MAX(rental_date) "
 	            + "FROM rental GROUP BY inventory_id)) t2 "
@@ -83,6 +83,7 @@
 	
 	rs2.next();
 	int totalCnt = rs2.getInt("cnt");
+	System.out.println("totalCnt " + totalCnt);
 	
 	int lastPage = totalCnt / rowPerPage;
 	if(totalCnt % rowPerPage != 0) {
@@ -97,6 +98,10 @@
 		m.put("t2.isRental", rs1.getObject("t2.isRental"));
 		m.put("t1.store_id", rs1.getObject("t1.store_id"));
 		list.add(m);
+		
+	    if(m.get("t2.isRental") == null){
+	        m.put("t2.isRental", "가능");
+	    }
 	}
 %>
 <!DOCTYPE html>
@@ -198,21 +203,25 @@
 			<td><%=m.get("t2.isRental") %></td>
 			<td>
 				<% 
-					if(m.get("t2.isRental") == null || m.get("t2.isRental").equals("불가")){
-				%>
-					<button type="button" style="background-color:olive">반납하기</button>
-				<%
-					} else {
+					if(m.get("t2.isRental") == null){
 				%>
 					<a href="/sakila/d0327/insertRentalForm.jsp?inventoryId=<%=m.get("t1.inventory_id") %>"><button type="button">대여하기</button></a>
 				<%
-					}
+					} else if(m.get("t2.isRental").equals("가능")) {
+				%>
+					<a href="/sakila/d0327/insertRentalForm.jsp?inventoryId=<%=m.get("t1.inventory_id") %>"><button type="button">대여하기</button></a>
+				<%
+					} else if(m.get("t2.isRental") != null || m.get("t2.isRental").equals("불가")) {
 				%>							
+					<button type="button" style="background-color:olive">반납하기</button>
+				<%
+					}
+				%>	
 			</td>
 		</tr>
-	<%
-		}
-	%>
+		<%
+			}
+		%>
 	</table>
 
 	<form action="/sakila/d0327/inventoryList.jsp">
@@ -237,7 +246,7 @@
 	%>
 		<a href="/sakila/d0327/inventoryList.jsp?currentPage=<%=lastPage%>&searchWord=<%=searchWord%>">마지막</a>   
 	<%
-		}
+		} System.out.println("lastPage" + lastPage);
 	%>  
 	</div>
 </body>
