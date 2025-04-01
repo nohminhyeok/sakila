@@ -213,7 +213,9 @@
 				<%
 					} else if(m.get("t2.isRental") != null || m.get("t2.isRental").equals("불가")) {
 				%>							
-					<button type="button" style="background-color:olive">반납하기</button>
+					<a href="/sakila/d0401/insertReturnForm.jsp?inventoryId=<%=m.get("t1.inventory_id")%>">
+						<button type="button" style="background-color:olive">반납하기</button>
+					</a>
 				<%
 					}
 				%>	
